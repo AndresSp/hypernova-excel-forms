@@ -1,7 +1,7 @@
 'use strict';
 
-import { Box, Button, Container, IconButton, makeStyles, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Toolbar, Tooltip, Typography, useMediaQuery, useTheme } from '@material-ui/core';
-import { DateRangeDelimiter, DateRangePicker, DatePicker } from '@material-ui/pickers';
+import { Box, Button, Container, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Divider, IconButton, makeStyles, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Toolbar, Tooltip, Typography, useMediaQuery, useTheme } from '@material-ui/core';
+import { DateRangeDelimiter, DateRangePicker, DatePicker, TimePicker, KeyboardDatePicker, KeyboardTimePicker } from '@material-ui/pickers';
 import Head from 'next/head';
 import React, { useState } from 'react';
 import { 
@@ -32,17 +32,19 @@ const useStyles = makeStyles((theme) => ({
         marginBottom: theme.spacing(1),
         flexGrow: 1
     },
+    table: {
+        width: '100%'
+    },
     tableToolbar: {
-        backgroundColor: theme.palette.secondary.main,
+        background: theme.palette.primary.main,
         borderTopLeftRadius: 5,
         borderTopRightRadius: 5
     },
     tableTitle: {
         flex: '1 1 100%',
-        color: theme.palette.primary.contrastText
+        color: theme.palette.text.primary
     },
     tableAddButton: {
-        color: 'white',
         marginRight: theme.spacing(3),
         [theme.breakpoints.down('sm')]: {
             marginRight: theme.spacing(0)
@@ -52,7 +54,30 @@ const useStyles = makeStyles((theme) => ({
         display: 'flex',
         flexFlow: 'row nowrap',
         justifyContent: 'center'
-    }
+    },
+    dialogTitle: {
+        backgroundColor: theme.palette.primary.main
+    },
+    dialogActions: {
+        paddingLeft: 20,
+        paddingRight: 20
+    },
+    submitButton: {
+        background: `linear-gradient(to right, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+        animation: 'gradient 1s ease infinite',
+        transition: '0.5s',
+    },
+    '@keyframes gradient': { 
+        '0%': { 
+            backgroundPosition: '0% 50%' 
+        },
+        '50%': { 
+            backgroundPosition: '100% 50%' 
+        },
+        '100%': { 
+            backgroundPosition: '0% 50%' 
+        }
+      }
   }));
 
 
@@ -79,6 +104,101 @@ export default function ExtraHours() {
     };
     //#endregion Tooltip
 
+    //#region add dialog
+    const [openAddDialog, setOpenAddDialog] = useState(false);
+
+    const handleAddDialogOpen = () => {
+        setOpenAddDialog(true);
+      };
+    
+    const handleAddDialogClose = () => {
+        setOpenAddDialog(false);
+      };
+    
+    const AddDialog = () => {
+        return (
+        <Dialog
+        open={openAddDialog}
+        onClose={handleAddDialogClose}
+        maxWidth='sm'
+        fullWidth
+        aria-labelledby='add-dialog-title'
+        aria-describedby='add-dialog-description'>
+            <DialogTitle id='add-dialog-title'
+            className={classes.dialogTitle}>
+                Nuevo día extraordinario
+            </DialogTitle>
+            <DialogContent>
+                <Box mt={2}>
+                    <DatePicker
+                    inputVariant='outlined'
+                    size='small'
+                    input
+                    fullWidth
+                    className={classes.textfield}
+                    label='Fecha'
+                    InputAdornmentProps={{ position: 'end' }}
+                    format='dd/MM/yyyy'
+                    value={selectedDate}
+                    onChange={handleDateChange}
+                    />
+                </Box>
+                <Box mt={2}>
+                    <Typography>Jornada Regular</Typography>
+                    <div className={classes.row}>
+                        <TimePicker 
+                        inputVariant='outlined'
+                        size='small'
+                        className={classes.textfieldGrow} 
+                        label='Hora Inicial'/>
+
+                        <TimePicker 
+                        inputVariant='outlined'
+                        size='small'
+                        className={classes.textfieldGrow} 
+                        label='Hora Final'/>
+                    </div>
+                </Box>
+                <Box mt={2}>
+                    <Typography color='textSecondary'>Jornada Extraordinaria</Typography>
+                    <div className={classes.row}>
+                        <TimePicker 
+                        inputVariant='outlined'
+                        size='small'
+                        className={classes.textfieldGrow} 
+                        label='Hora Inicial'/>
+                        
+                        <TimePicker 
+                        inputVariant='outlined'
+                        size='small'
+                        className={classes.textfieldGrow} 
+                        label='Hora Final'/>
+                    </div>
+                </Box>
+                <Box mt={2}>
+                    <div className={classes.row}>
+                        <TextField
+                            label='Justificativos' 
+                            variant='outlined' 
+                            size='small'
+                            multiline
+                            rows={4}
+                            className={classes.textfieldGrow} />
+                    </div>
+                </Box>
+            </DialogContent>
+            <DialogActions className={classes.dialogActions}>
+                <Button color='secondary' variant='outlined' onClick={handleAddDialogClose}>
+                    Cancelar
+                </Button>
+                <Button color='secondary' variant='contained' onClick={handleAddDialogClose} autoFocus>
+                    Agregar
+                </Button>
+            </DialogActions>
+        </Dialog>
+        )
+    } 
+    //#endregion add dialog
     function createData(name, calories, fat, carbs, protein) {
         return { name, calories, fat, carbs, protein };
       }
@@ -111,8 +231,7 @@ export default function ExtraHours() {
                     width='100%'>
                         <img  src='/img/logo.png' className={classes.logo}/>
                         <Typography 
-                        variant={sm? 'h5': 'h4'}
-                        color='primary'>
+                        variant={sm? 'h5': 'h4'}>
                             Formulario para Pago de Horas Extraordinarias
                         </Typography>
                     </Box>
@@ -179,27 +298,31 @@ export default function ExtraHours() {
                                         onMouseEnter={handleTooltipMouseEnter} 
                                         onMouseLeave={handleTooltipMouseLeave}
                                         disableRipple>
-                                            <HelpIcon
-                                            style={{ color: 'white' }}/>
+                                            <HelpIcon/>
                                         </IconButton>
                                     </Tooltip>
                                 </Typography>
                                 {
                                     sm ? (
-                                    <IconButton className={classes.tableAddButton}>
+                                    <IconButton 
+                                    onClick={handleAddDialogOpen}
+                                    className={classes.tableAddButton}>
                                         <AddIcon/>
                                     </IconButton>
                                     ) : (
-                                    <Button 
+                                    <Button
+                                    
                                     startIcon={<AddIcon/>}
+                                    onClick={handleAddDialogOpen}
                                     className={classes.tableAddButton}>
                                         Agregar
                                     </Button>
                                     )
                                 }
+                                <AddDialog/>
                             </Toolbar>
                             <TableContainer>
-                                <Table style={{width: '100%'}} aria-label='Jornada Extraordinaria'>
+                                <Table className={classes.table} aria-label='Jornada Extraordinaria'>
                                     <TableHead>
                                     <TableRow>
                                         <TableCell>Justificativos</TableCell>
@@ -217,10 +340,10 @@ export default function ExtraHours() {
                                             <TableCell component='th' scope='row'>{row.name}</TableCell>
                                             <TableCell align='center'>{row.fat}</TableCell>
                                             <TableCell align='center' className={classes.tableActions}>
-                                                <IconButton size='small' color='primary'>
+                                                <IconButton size='small'>
                                                     <EditIcon/>
                                                 </IconButton>
-                                                <IconButton size='small' color='primary'>
+                                                <IconButton size='small'>
                                                     <DeleteIcon/>
                                                 </IconButton>
                                             </TableCell>
@@ -232,7 +355,7 @@ export default function ExtraHours() {
                         </Paper>
                     </Box>
                     <Box my={2} px={sm ? 0 : 3} width='100%'>
-                        <Button variant='contained' color='secondary' style={{color: 'white'}} fullWidth>
+                        <Button variant='contained' color='secondary' fullWidth>
                             Generar Excel
                         </Button>
                     </Box>

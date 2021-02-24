@@ -1,43 +1,26 @@
-const { createMuiTheme } = require('@material-ui/core/styles');
+
+import { createMuiTheme } from '@material-ui/core';
+import { teal } from '@material-ui/core/colors';
 
 // Create a theme instance.
 const theme = createMuiTheme({
   palette: {
-    type: 'light',
+    type: 'dark',
     primary: {
-      main: '#0A2333',
+      main: '#12c4b2',
     },
     secondary: {
-      main: '#69CC8C',
+      main: '#fada51',
     },
-    yellow: {
-      main: '#C3D568'
-    },
-    text: {
-      default: '#0A2333'
-    },
+    // text: {
+    //   primary: '#092333',
+    //   secondary: '#092333'
+    // },
     background: {
-      default: '#FAFAFA',
+      default: '#092333',
     },
   },
 });
 
-// const theme = createMuiTheme({
-//   palette: {
-//     type: 'dark',
-//     primary: {
-//       main: '#59CB94',
-//     },
-//     secondary: {
-//       main: '#D9D75F',
-//     },
-//     text: {
-//       default: '#59CB94'
-//     },
-//     background: {
-//       default: '#0A2333',
-//     },
-//   },
-// });
 
 export default theme;
