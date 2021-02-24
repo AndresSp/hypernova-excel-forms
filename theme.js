@@ -1,6 +1,5 @@
 
 import { createMuiTheme } from '@material-ui/core';
-import { teal } from '@material-ui/core/colors';
 
 // Create a theme instance.
 const theme = createMuiTheme({
@@ -10,7 +9,7 @@ const theme = createMuiTheme({
       main: '#12c4b2',
     },
     secondary: {
-      main: '#fada51',
+      main: '#6b239e',
     },
     // text: {
     //   primary: '#092333',
@@ -19,6 +18,9 @@ const theme = createMuiTheme({
     background: {
       default: '#092333',
     },
+  },
+  typography: {
+    fontFamily: 'Gotham'
   },
 });
 

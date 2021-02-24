@@ -1,94 +1,44 @@
 'use strict';
 
-import { Box, Button, Container, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Divider, IconButton, makeStyles, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Toolbar, Tooltip, Typography, useMediaQuery, useTheme } from '@material-ui/core';
-import { DateRangeDelimiter, DateRangePicker, DatePicker, TimePicker, KeyboardDatePicker, KeyboardTimePicker } from '@material-ui/pickers';
+import { 
+    Box, 
+    Button, 
+    Container,  
+    IconButton, 
+    Paper, 
+    Table, 
+    TableBody, 
+    TableCell, 
+    TableContainer, 
+    TableHead, 
+    TableRow, 
+    TextField, 
+    Toolbar, 
+    Tooltip, 
+    Typography, 
+    useMediaQuery, 
+    useTheme 
+} from '@material-ui/core';
+import { 
+    DatePicker
+} from '@material-ui/pickers';
 import Head from 'next/head';
 import React, { useState } from 'react';
 import { 
     Help as HelpIcon, 
-    Search as SearchIcon,
     Edit as EditIcon,
     Delete as DeleteIcon,
-    Add as AddIcon } from '@material-ui/icons';
-
-const useStyles = makeStyles((theme) => ({
-    logo: {
-        width: 120,
-        [theme.breakpoints.down('sm')]: {
-            width: 100
-        }
-    },
-    textfield: {
-        marginTop: theme.spacing(1),
-        marginBottom: theme.spacing(1)
-    },
-    row: {
-        display: 'flex',
-        width: '100%',
-        gap: theme.spacing(1)
-    },
-    textfieldGrow: {
-        marginTop: theme.spacing(1),
-        marginBottom: theme.spacing(1),
-        flexGrow: 1
-    },
-    table: {
-        width: '100%'
-    },
-    tableToolbar: {
-        background: theme.palette.primary.main,
-        borderTopLeftRadius: 5,
-        borderTopRightRadius: 5
-    },
-    tableTitle: {
-        flex: '1 1 100%',
-        color: theme.palette.text.primary
-    },
-    tableAddButton: {
-        marginRight: theme.spacing(3),
-        [theme.breakpoints.down('sm')]: {
-            marginRight: theme.spacing(0)
-        }
-    },
-    tableActions: {
-        display: 'flex',
-        flexFlow: 'row nowrap',
-        justifyContent: 'center'
-    },
-    dialogTitle: {
-        backgroundColor: theme.palette.primary.main
-    },
-    dialogActions: {
-        paddingLeft: 20,
-        paddingRight: 20
-    },
-    submitButton: {
-        background: `linear-gradient(to right, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
-        animation: 'gradient 1s ease infinite',
-        transition: '0.5s',
-    },
-    '@keyframes gradient': { 
-        '0%': { 
-            backgroundPosition: '0% 50%' 
-        },
-        '50%': { 
-            backgroundPosition: '100% 50%' 
-        },
-        '100%': { 
-            backgroundPosition: '0% 50%' 
-        }
-      }
-  }));
+    Add as AddIcon 
+} from '@material-ui/icons';
+import { Controller, useForm } from 'react-hook-form';
+import AddDialog from '../components/horasextras/addDialog';
+import useStyles from '../styles';
 
 
 export default function ExtraHours() {
     const classes = useStyles();
     const theme = useTheme();
     const sm = useMediaQuery(theme.breakpoints.down('sm'));
-
-    //#region datepickers
-    const [selectedDate, handleDateChange] = useState(new Date());
-    //#endregion datepickers
 
     //#region Tooltip
     const [open, setOpen] = useState(false);
@@ -109,96 +59,18 @@ export default function ExtraHours() {
 
     const handleAddDialogOpen = () => {
         setOpenAddDialog(true);
-      };
-    
+    };
+
     const handleAddDialogClose = () => {
         setOpenAddDialog(false);
-      };
-    
-    const AddDialog = () => {
-        return (
-        <Dialog
-        open={openAddDialog}
-        onClose={handleAddDialogClose}
-        maxWidth='sm'
-        fullWidth
-        aria-labelledby='add-dialog-title'
-        aria-describedby='add-dialog-description'>
-            <DialogTitle id='add-dialog-title'
-            className={classes.dialogTitle}>
-                Nuevo día extraordinario
-            </DialogTitle>
-            <DialogContent>
-                <Box mt={2}>
-                    <DatePicker
-                    inputVariant='outlined'
-                    size='small'
-                    input
-                    fullWidth
-                    className={classes.textfield}
-                    label='Fecha'
-                    InputAdornmentProps={{ position: 'end' }}
-                    format='dd/MM/yyyy'
-                    value={selectedDate}
-                    onChange={handleDateChange}
-                    />
-                </Box>
-                <Box mt={2}>
-                    <Typography>Jornada Regular</Typography>
-                    <div className={classes.row}>
-                        <TimePicker 
-                        inputVariant='outlined'
-                        size='small'
-                        className={classes.textfieldGrow} 
-                        label='Hora Inicial'/>
+    };
 
-                        <TimePicker 
-                        inputVariant='outlined'
-                        size='small'
-                        className={classes.textfieldGrow} 
-                        label='Hora Final'/>
-                    </div>
-                </Box>
-                <Box mt={2}>
-                    <Typography color='textSecondary'>Jornada Extraordinaria</Typography>
-                    <div className={classes.row}>
-                        <TimePicker 
-                        inputVariant='outlined'
-                        size='small'
-                        className={classes.textfieldGrow} 
-                        label='Hora Inicial'/>
-                        
-                        <TimePicker 
-                        inputVariant='outlined'
-                        size='small'
-                        className={classes.textfieldGrow} 
-                        label='Hora Final'/>
-                    </div>
-                </Box>
-                <Box mt={2}>
-                    <div className={classes.row}>
-                        <TextField
-                            label='Justificativos' 
-                            variant='outlined' 
-                            size='small'
-                            multiline
-                            rows={4}
-                            className={classes.textfieldGrow} />
-                    </div>
-                </Box>
-            </DialogContent>
-            <DialogActions className={classes.dialogActions}>
-                <Button color='secondary' variant='outlined' onClick={handleAddDialogClose}>
-                    Cancelar
-                </Button>
-                <Button color='secondary' variant='contained' onClick={handleAddDialogClose} autoFocus>
-                    Agregar
-                </Button>
-            </DialogActions>
-        </Dialog>
-        )
-    } 
+    
     //#endregion add dialog
+
+    //#region form
+    const { register, handleSubmit, control, watch, errors } = useForm();
+      const onSubmit = data => console.log(data);
     function createData(name, calories, fat, carbs, protein) {
         return { name, calories, fat, carbs, protein };
       }
@@ -210,6 +82,7 @@ export default function ExtraHours() {
         createData('Cupcake', 305, 3.7, 67, 4.3),
         createData('Gingerbread', 356, 16.0, 49, 3.9),
       ];
+    //#endregion form
 
     return (
         <>
@@ -223,6 +96,10 @@ export default function ExtraHours() {
                 alignItems='center' 
                 borderRadius={10} 
                 boxShadow={3}
+                component='form'
+                noValidate
+                autoComplete='off'
+                onSubmit={handleSubmit(onSubmit)}
                 padding={sm ? 2 : 5}>
                     <Box
                     display='flex'
@@ -242,46 +119,57 @@ export default function ExtraHours() {
                     justifyContent='center'
                     alignItems='center'
                     width='100%'
-                    component='form'
-                    noValidate
-                    autoComplete='off'
+                    component='div'
                     my={2}
                     px={ sm ? 0 : 3 }>
                         <TextField 
+                        name='name'
                         label='Nombres y Apellidos' 
                         variant='outlined'
                         size='small'
                         fullWidth 
-                        className={classes.textfield} />
+                        className={classes.textfield}
+                        inputRef={register({ required: true })} />
 
                         <div className={classes.row}>
                             <TextField 
+                            name='role'
                             label='Cargo' 
                             variant='outlined' 
                             size='small' 
-                            className={classes.textfieldGrow} />
+                            className={classes.textfieldGrow} 
+                            inputRef={register({ required: true })}/>
 
                             <TextField 
+                            name='department'
                             label='Departamento' 
                             variant='outlined' 
                             size='small' 
-                            className={classes.textfieldGrow} />
+                            className={classes.textfieldGrow}
+                            inputRef={register({ required: true })} />
                         </div>
 
                         <div className={classes.row}>
-                            <DatePicker
-                            openTo='month'
-                            views={['year', 'month']}
-                            inputVariant='outlined'
-                            size='small'
-                            input
-                            InputAdornmentProps={{ position: 'end' }}
-                            fullWidth
-                            className={classes.textfield}
-                            label='Período'
-                            value={selectedDate}
-                            onChange={handleDateChange}
-                            />
+                        <Controller
+                            name='month'
+                            control={control}
+                            defaultValue={false}
+                            rules={{ required: true }}
+                            render={({ ref, ...rest }) =>
+                                <DatePicker
+                                name='month'
+                                openTo='month'
+                                views={['year', 'month']}
+                                inputVariant='outlined'
+                                size='small'
+                                input
+                                fullWidth
+                                className={classes.textfield}
+                                label='Período'
+                                {...rest}
+                                />
+                            } // props contains: onChange, onBlur and value
+                        />
                         </div>
 
                     </Box>
@@ -319,7 +207,7 @@ export default function ExtraHours() {
                                     </Button>
                                     )
                                 }
-                                <AddDialog/>
+                                <AddDialog open={openAddDialog} onClose={handleAddDialogClose}/>
                             </Toolbar>
                             <TableContainer>
                                 <Table className={classes.table} aria-label='Jornada Extraordinaria'>
@@ -355,7 +243,7 @@ export default function ExtraHours() {
                         </Paper>
                     </Box>
                     <Box my={2} px={sm ? 0 : 3} width='100%'>
-                        <Button variant='contained' color='secondary' fullWidth>
+                        <Button type='submit' variant='contained' color='secondary' fullWidth>
                             Generar Excel
                         </Button>
                     </Box>
