@@ -7,8 +7,7 @@ const useStyles = makeStyles((theme) => ({
             width: 100
         }
     },
-    textfield: {
-        marginTop: theme.spacing(1),
+    label: {
         marginBottom: theme.spacing(1)
     },
     row: {
@@ -17,8 +16,6 @@ const useStyles = makeStyles((theme) => ({
         gap: theme.spacing(1)
     },
     textfieldGrow: {
-        marginTop: theme.spacing(1),
-        marginBottom: theme.spacing(1),
         flexGrow: 1
     },
     table: {

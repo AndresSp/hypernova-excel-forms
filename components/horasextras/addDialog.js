@@ -7,15 +7,40 @@ import {
     DialogActions, 
     DialogContent, 
     DialogTitle, 
-    TextField, 
     Typography} from '@material-ui/core';
-import { TimePicker } from '@material-ui/pickers';
 
-import React from 'react';
+import React, { useEffect } from 'react';
+import { FormProvider, useForm } from 'react-hook-form';
 import useStyles from '../../styles';
+import FormDatePicker from '../formFields/formDatePicker';
+import FormTextField from '../formFields/formTextField';
+import FormTimePicker from '../formFields/formTimePicker';
 
-const AddDialog = ({ open, onClose }) => {
+
+const AddDialog = ({ open, onClose, onSubmit, onEdit, edit = false }) => {
     const classes = useStyles();
+    
+    const { handleSubmit, control, errors, reset } = useForm();
+
+    useEffect(() => {
+        console.log(edit)
+        if (!!edit) {
+            reset(edit.data)
+        }
+    }, [edit]);
+
+    const onInnerSubmit = data => {
+        onSubmit(data)
+    };
+
+    const onEditSubmit = data => {
+        onEdit(data, edit.index)
+    };
+
+    const onError = error => {
+        console.log(error)
+    }
+    
     return (
     <Dialog
     open={open}
@@ -29,70 +54,88 @@ const AddDialog = ({ open, onClose }) => {
             Nuevo día extraordinario
         </DialogTitle>
         <DialogContent>
-            <Box mt={2}>
-                {/* <DatePicker
-                inputVariant='outlined'
-                size='small'
-                input
-                fullWidth
-                className={classes.textfield}
-                label='Fecha'
-                format='dd/MM/yyyy'
-                value={selectedDate}
-                onChange={handleDateChange}
-                /> */}
-            </Box>
-            <Box mt={2}>
-                <Typography>Jornada Regular</Typography>
-                <div className={classes.row}>
-                    <TimePicker 
-                    inputVariant='outlined'
-                    size='small'
-                    className={classes.textfieldGrow} 
-                    label='Hora Inicial'/>
-
-                    <TimePicker 
-                    inputVariant='outlined'
-                    size='small'
-                    className={classes.textfieldGrow} 
-                    label='Hora Final'/>
-                </div>
-            </Box>
-            <Box mt={2}>
-                <Typography color='textSecondary'>Jornada Extraordinaria</Typography>
-                <div className={classes.row}>
-                    <TimePicker 
-                    inputVariant='outlined'
-                    size='small'
-                    className={classes.textfieldGrow} 
-                    label='Hora Inicial'/>
-                    
-                    <TimePicker 
-                    inputVariant='outlined'
-                    size='small'
-                    className={classes.textfieldGrow} 
-                    label='Hora Final'/>
-                </div>
-            </Box>
-            <Box mt={2}>
-                <div className={classes.row}>
-                    <TextField
-                        label='Justificativos' 
-                        variant='outlined' 
-                        size='small'
+            <FormProvider { ...{ control, errors } }>
+                <form 
+                noValidate 
+                autoComplete='off'
+                onSubmit={handleSubmit(onSubmit, onError)}>
+                    <Box mt={2}>
+                        <FormDatePicker
+                        name='overtimeDate'
+                        label='Período'
+                        rules={{ required: true }}
+                        openTo='month'
+                        views={['year', 'month']}
+                        defaultValue={new Date()}
+                        fullWidth
+                        />
+                    </Box>
+                    <Box mt={2}>
+                        <Typography className={classes.label}>Jornada Regular</Typography>
+                        <div className={classes.row}>
+                            <FormTimePicker
+                            name='workdayStart'
+                            label='Hora Inicial'
+                            rules={{ required: true }}
+                            className={classes.textfieldGrow}
+                            defaultValue={new Date()}
+                            />
+                            <FormTimePicker
+                            name='workdayEnd'
+                            label='Hora Final'
+                            rules={{ required: true }}
+                            className={classes.textfieldGrow}
+                            defaultValue={new Date()}
+                            />
+                        </div>
+                    </Box>
+                    <Box mt={2}>
+                        <Typography className={classes.label} >Jornada Extraordinaria</Typography>
+                        <div className={classes.row}>
+                            <FormTimePicker
+                            name='overtimeStartTime'
+                            label='Hora Inicial'
+                            rules={{ required: true }}
+                            className={classes.textfieldGrow}
+                            defaultValue={new Date()}
+                            />
+                            <FormTimePicker
+                            name='overtimeEndTime'
+                            label='Hora FInal'
+                            rules={{ required: true }}
+                            className={classes.textfieldGrow}
+                            defaultValue={new Date()}
+                            />
+                        </div>
+                    </Box>
+                    <Box mt={2}>
+                        <FormTextField
+                        name='details'
+                        label='Justificativos'
+                        rules={{ required: true }}
+                        className={classes.textfieldGrow}
+                        fullWidth
                         multiline
-                        rows={4}
-                        className={classes.textfieldGrow} />
-                </div>
-            </Box>
+                        rows={4}/>
+                    </Box>
+                </form>
+            </FormProvider>
         </DialogContent>
         <DialogActions className={classes.dialogActions}>
-            <Button color='secondary' variant='outlined' onClick={onClose}>
+            <Button variant='outlined' onClick={onClose}>
                 Cancelar
             </Button>
-            <Button color='secondary' variant='contained' onClick={onClose} autoFocus>
-                Agregar
-            </Button>
+            {
+                !!edit ? (
+                    <Button type='submit' color='secondary' variant='contained' onClick={handleSubmit(onEditSubmit, onError)} autoFocus>
+                        Editar
+                    </Button>
+                ) : (
+                    <Button type='submit' color='secondary' variant='contained' onClick={handleSubmit(onInnerSubmit, onError)} autoFocus>
+                        Agregar
+                    </Button>
+                )
+            }
         </DialogActions>
     </Dialog>
     )

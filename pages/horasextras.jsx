@@ -12,27 +12,26 @@ import {
     TableContainer, 
     TableHead, 
     TableRow, 
-    TextField, 
     Toolbar, 
     Tooltip, 
     Typography, 
     useMediaQuery, 
     useTheme 
 } from '@material-ui/core';
-import { 
-    DatePicker
-} from '@material-ui/pickers';
 import Head from 'next/head';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
     Help as HelpIcon, 
     Edit as EditIcon,
     Delete as DeleteIcon,
     Add as AddIcon 
 } from '@material-ui/icons';
-import { Controller, useForm } from 'react-hook-form';
+import { FormProvider, useForm } from 'react-hook-form';
 import AddDialog from '../components/horasextras/addDialog';
 import useStyles from '../styles';
+import FormTextField from '../components/formFields/formTextField';
+import FormDatePicker from '../components/formFields/formDatePicker';
+import { differenceInMinutes } from 'date-fns';
 
 
 export default function ExtraHours() {
@@ -56,33 +55,70 @@ export default function ExtraHours() {
 
     //#region add dialog
     const [openAddDialog, setOpenAddDialog] = useState(false);
+    const [edit, setEdit] = useState(false);
+    const [overtimeWork, setOvertimeWork] = useState([]);
 
     const handleAddDialogOpen = () => {
         setOpenAddDialog(true);
     };
 
     const handleAddDialogClose = () => {
-        setOpenAddDialog(false);
+        setOpenAddDialog(false)
     };
+
+    const handleAddDialogSubmit = (data) => {
+        addOvertimeWork(data)
+        setOpenAddDialog(false)
+    };
+
+    const handleEditDialogSubmit = (data, idx) => {
+        const temp = [...overtimeWork]
+        temp.splice(idx, 1, data)
+        setOvertimeWork(temp)
+        setOpenAddDialog(false)
+    }
 
     
     //#endregion add dialog
 
     //#region form
-    const { register, handleSubmit, control, watch, errors } = useForm();
-      const onSubmit = data => console.log(data);
-    function createData(name, calories, fat, carbs, protein) {
-        return { name, calories, fat, carbs, protein };
-      }
+    const { handleSubmit, control, errors } = useForm();
+
+
+    const addOvertimeWork = (data) => {
+        setOvertimeWork([ ...overtimeWork, data ])
+    }
+
+    const editOvertimeWork = (data, idx) => {
+        setEdit({ data: data, index: idx })
+        setOpenAddDialog(data)
+    }
+    
+
+    const removeOvertimeWork = (idx) => {
+        const temp = [...overtimeWork]
+        temp.splice(idx, 1)
+        setOvertimeWork(temp)
+    }
+
+    const onSubmit = (data) => {
+        console.log({ 
+            ... { overtimework: overtimeWork },
+            ...data 
+        })
+    };
+
+    const onError = error => {
+        console.log(error)
+    }
       
-      const rows = [
-        createData('Frozen yoghurt', 159, 6.0, 24, 4.0),
-        createData('Ice cream sandwich', 237, 9.0, 37, 4.3),
-        createData('Eclair', 262, 16.0, 24, 6.0),
-        createData('Cupcake', 305, 3.7, 67, 4.3),
-        createData('Gingerbread', 356, 16.0, 49, 3.9),
-      ];
     //#endregion form
+
+    const diffInHours = (start, end) => {
+        const minutes = differenceInMinutes(end, start) 
+        const hours = minutes/60
+        return Math.round((hours + Number.EPSILON) * 100) / 100
+    }
 
     return (
         <>
@@ -90,6 +126,7 @@ export default function ExtraHours() {
                 <title>Pago de Horas Extraordinarias - Hypernovalabs</title>
             </Head>
             <Container maxWidth='md' disableGutters>
+            <FormProvider { ...{ control, errors } }>
                 <Box 
                 display='flex'
                 flexDirection='column'
@@ -99,7 +136,7 @@ export default function ExtraHours() {
                 component='form'
                 noValidate
                 autoComplete='off'
-                onSubmit={handleSubmit(onSubmit)}
+                onSubmit={handleSubmit(onSubmit, onError)}
                 padding={sm ? 2 : 5}>
                     <Box
                     display='flex'
@@ -117,60 +154,51 @@ export default function ExtraHours() {
                     display='flex'
                     flexDirection='column'
                     justifyContent='center'
-                    alignItems='center'
+                    alignItems='stretch'
                     width='100%'
                     component='div'
                     my={2}
                     px={ sm ? 0 : 3 }>
-                        <TextField 
-                        name='name'
-                        label='Nombres y Apellidos' 
-                        variant='outlined'
-                        size='small'
-                        fullWidth 
-                        className={classes.textfield}
-                        inputRef={register({ required: true })} />
+                        <Box mt={2}>
+                                <FormTextField
+                                name='fullname'
+                                label='Nombres y Apellidos'
+                                rules={{ required: true }}
+                                fullWidth
+                                />
+                        </Box>
+                        <Box mt={2}>
+                            <div className={classes.row}>
+                                <FormTextField
+                                name='role'
+                                label='Cargo'
+                                rules={{ required: true }}
+                                className={classes.textfieldGrow}
+                                fullWidth
+                                />
 
-                        <div className={classes.row}>
-                            <TextField 
-                            name='role'
-                            label='Cargo' 
-                            variant='outlined' 
-                            size='small' 
-                            className={classes.textfieldGrow} 
-                            inputRef={register({ required: true })}/>
-
-                            <TextField 
-                            name='department'
-                            label='Departamento' 
-                            variant='outlined' 
-                            size='small' 
-                            className={classes.textfieldGrow}
-                            inputRef={register({ required: true })} />
-                        </div>
-
-                        <div className={classes.row}>
-                        <Controller
-                            name='month'
-                            control={control}
-                            defaultValue={false}
-                            rules={{ required: true }}
-                            render={({ ref, ...rest }) =>
-                                <DatePicker
+                                <FormTextField
+                                name='dept'
+                                label='Departamento'
+                                rules={{ required: true }}
+                                className={classes.textfieldGrow}
+                                fullWidth
+                                />
+                            </div>
+                        </Box>
+                        <Box mt={2}>
+                            <div className={classes.row}>
+                                <FormDatePicker
                                 name='month'
+                                label='Período'
+                                rules={{ required: true }}
                                 openTo='month'
                                 views={['year', 'month']}
-                                inputVariant='outlined'
-                                size='small'
-                                input
+                                defaultValue={new Date()}
                                 fullWidth
-                                className={classes.textfield}
-                                label='Período'
-                                {...rest}
                                 />
-                            } // props contains: onChange, onBlur and value
-                        />
-                        </div>
+                            </div>
+                        </Box>
 
                     </Box>
                     <Box my={2} px={ sm ? 0 : 3 } width='100%'>
@@ -194,12 +222,12 @@ export default function ExtraHours() {
                                     sm ? (
                                     <IconButton 
                                     onClick={handleAddDialogOpen}
-                                    className={classes.tableAddButton}>
+                                    cl8assName={classes.tableAddButton}>
                                         <AddIcon/>
                                     </IconButton>
                                     ) : (
                                     <Button
-                                    
+                                    size='large'
                                     startIcon={<AddIcon/>}
                                     onClick={handleAddDialogOpen}
                                     className={classes.tableAddButton}>
@@ -207,48 +235,63 @@ export default function ExtraHours() {
                                     </Button>
                                     )
                                 }
-                                <AddDialog open={openAddDialog} onClose={handleAddDialogClose}/>
                             </Toolbar>
                             <TableContainer>
                                 <Table className={classes.table} aria-label='Jornada Extraordinaria'>
                                     <TableHead>
-                                    <TableRow>
-                                        <TableCell>Justificativos</TableCell>
-                                        {/* <TableCell align='center'>Fecha y Hora</TableCell>
-                                        <TableCell align='center'>Hora Ingreso</TableCell>
-                                        <TableCell align='center'>Hora Salida</TableCell> */}
-                                        {/* <TableCell align='center'>Total de Horas</TableCell> */}
-                                        <TableCell align='center'>Horas Trabajadas</TableCell>
-                                        <TableCell align='center'>Acciones</TableCell>
-                                    </TableRow>
+                                    {
+                                        overtimeWork?.length > 0 ? (
+                                        <TableRow>
+                                            <TableCell>Justificativos</TableCell>
+                                            <TableCell align='center'>Horas Trabajadas</TableCell>
+                                            <TableCell align='center'>Acciones</TableCell>
+                                        </TableRow>
+                                        ) : ''
+                                    }
                                     </TableHead>
                                     <TableBody>
-                                    {rows.map((row) => (
-                                        <TableRow key={row.name}>
-                                            <TableCell component='th' scope='row'>{row.name}</TableCell>
-                                            <TableCell align='center'>{row.fat}</TableCell>
-                                            <TableCell align='center' className={classes.tableActions}>
-                                                <IconButton size='small'>
-                                                    <EditIcon/>
-                                                </IconButton>
-                                                <IconButton size='small'>
-                                                    <DeleteIcon/>
-                                                </IconButton>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
+                                    { overtimeWork?.length > 0 ?
+                                        overtimeWork.map((row, i) => (
+                                            <TableRow key={i}>
+                                                <TableCell component='th' scope='row'>{row.details}</TableCell>
+                                                <TableCell align='center'>{ diffInHours(row.overtimeStartTime, row.overtimeEndTime) }</TableCell>
+                                                <TableCell align='center' className={classes.tableActions}>
+                                                    <IconButton size='small' onClick={() => editOvertimeWork(row, i)}>
+                                                        <EditIcon/>
+                                                    </IconButton>
+                                                    <IconButton size='small' onClick={() => removeOvertimeWork(i)}>
+                                                        <DeleteIcon/>
+                                                    </IconButton>
+                                                </TableCell>
+                                            </TableRow>
+                                        )) : (
+                                            <TableRow >
+                                                <TableCell component='th' align='center' colSpan={3} scope='row'>
+                                                    <Typography>No hay datos</Typography>
+                                                </TableCell>
+                                            </TableRow>
+                                        )
+                                    }
                                     </TableBody>
                                 </Table>
                             </TableContainer>
                         </Paper>
+                        </Box>
+                        <Box my={2} px={sm ? 0 : 3} width='100%'>
+                            <Button type='submit' variant='contained' size='large' color='secondary' fullWidth>
+                                Generar Excel
+                            </Button>
+                        </Box>
                     </Box>
-                    <Box my={2} px={sm ? 0 : 3} width='100%'>
-                        <Button type='submit' variant='contained' color='secondary' fullWidth>
-                            Generar Excel
-                        </Button>
-                    </Box>
-                </Box>
+                </FormProvider>
             </Container>
+
+            <AddDialog 
+            open={openAddDialog} 
+            onSubmit={handleAddDialogSubmit}
+            onEdit={handleEditDialogSubmit}
+            onClose={handleAddDialogClose}
+            edit={edit} />
         </>
     )
 }
