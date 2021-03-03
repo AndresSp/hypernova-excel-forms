@@ -91,7 +91,7 @@ export default function ExtraHours() {
     //#endregion add dialog
 
     //#region form
-    const { handleSubmit, control, errors } = useForm();
+    const { handleSubmit, control, errors, reset } = useForm();
 
     const [loading, setLoading] = useState(false);
 
@@ -116,7 +116,23 @@ export default function ExtraHours() {
         setOvertimeWork(temp)
     }
 
+    useEffect(() => {
+        const fullname = localStorage.getItem('fullname')
+        const role = localStorage.getItem('role')
+        const dept = localStorage.getItem('dept')
+
+        reset({
+            fullname: fullname,
+            role: role,
+            dept: dept
+        })
+    }, [])
+
     const onSubmit = async (data) => {
+        localStorage.setItem('fullname', data.fullname)
+        localStorage.setItem('role', data.role)
+        localStorage.setItem('dept', data.dept)
+
         const payload = { 
                 fullname: String(data.fullname).trim(),
                 role: String(data.role).trim(),
@@ -176,7 +192,8 @@ export default function ExtraHours() {
             <Head>
                 <title>Pago de Horas Extraordinarias - Hypernovalabs</title>
             </Head>
-            <Container maxWidth='md' disableGutters>
+            <Container maxWidth='md' 
+            disableGutters>
             <FormProvider { ...{ control, errors } }>
                 <Box 
                 display='flex'
@@ -187,6 +204,7 @@ export default function ExtraHours() {
                 component='form'
                 noValidate
                 autoComplete='off'
+                className={classes.cardBackground}
                 onSubmit={handleSubmit(onSubmit, onError)}
                 padding={sm ? 2 : 5}>
                     <Box
@@ -342,7 +360,11 @@ export default function ExtraHours() {
                                     { overtimeWork?.length > 0 ?
                                         overtimeWork.map((row, i) => (
                                             <TableRow key={i}>
-                                                <TableCell component='th' scope='row'>{row.details}</TableCell>
+                                                <TableCell component='th' scope='row'>
+                                                        <Typography noWrap style={{width: 110}}>
+                                                            {row.details}
+                                                        </Typography>
+                                                    </TableCell>
                                                 <TableCell align='center'>{ diffInHours(row.overtimeStartTime, row.overtimeEndTime) }</TableCell>
                                                 <TableCell align='center' className={classes.tableActions}>
                                                     <IconButton size='small' onClick={() => editOvertimeWork(row, i)}>
