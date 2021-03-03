@@ -11,7 +11,7 @@ const dev = process.env.NODE_ENV !== 'production'
 const app = next({ dev })
 
 const server = Hapi.Server({
-    host: 'localhost',
+    host: '0.0.0.0',
     port: parseInt(process.env.PORT, 10) || 3000,
     routes: {
       cors: true
