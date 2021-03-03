@@ -9,9 +9,11 @@ import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import moment from "moment";
 import MomentUtils from '@date-io/moment';
 import 'moment/locale/es';
+import useStyles from '../styles.js';
 
 export default function MyApp(props) {
   const { Component, pageProps } = props;
+  const classes = useStyles();
 
   React.useEffect(() => {
     // Remove the server-side injected CSS.
@@ -35,7 +37,8 @@ export default function MyApp(props) {
             display='flex'
             justifyContent='center'
             alignItems='center'
-            minHeight='100vh'>
+            minHeight='100vh'
+            className={classes.body}>
             <Component {...pageProps} />
           </Box>
         </MuiPickersUtilsProvider>

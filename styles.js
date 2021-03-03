@@ -1,6 +1,13 @@
 import { makeStyles } from "@material-ui/core";
 
 const useStyles = makeStyles((theme) => ({
+    body: {
+        background: 'rgb(8,107,97)',
+        background: 'linear-gradient(0deg, rgba(8,107,97,1) 0%, rgba(9,35,51,1) 30%, rgba(9,35,51,1) 70%, rgba(78,26,115,1) 100%)'
+    },
+    cardBackground: {
+        background: theme.palette.background.default,
+    },
     logo: {
         width: 120,
         [theme.breakpoints.down('sm')]: {

@@ -62,10 +62,9 @@ const AddDialog = ({ open, onClose, onSubmit, onEdit, edit = false }) => {
                     <Box mt={2}>
                         <FormDatePicker
                         name='overtimeDate'
-                        label='Período'
+                        label='Fecha'
                         rules={{ required: true }}
-                        openTo='month'
-                        views={['year', 'month']}
+                        format="DD/MM/yyyy"
                         defaultValue={new Date()}
                         fullWidth
                         />
