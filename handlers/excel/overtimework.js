@@ -19,7 +19,6 @@ const overTimeWork = async (req, h) => {
     const docName = `Formulario de Horas Extras - ${fullname} ${monthText} ${yearNumber}.xlsx`
     const inputPath = path.join(__dirname, `./../../public/templates/Formulario de  Horas Extras - Hypernova Labs - template.xlsx`)
     const outputPath = path.join(__dirname, `./../../temp/overTimeWork.xlsx`)
-    const tempDir = path.join(__dirname, `./../../temp/`)
             
 
     const workbook = new ExcelJS.Workbook()
