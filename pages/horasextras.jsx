@@ -24,14 +24,17 @@ import {
     Help as HelpIcon, 
     Edit as EditIcon,
     Delete as DeleteIcon,
-    Add as AddIcon 
+    Add as AddIcon,
+    FileCopy as DuplicateIcon, 
 } from '@material-ui/icons';
 import { FormProvider, useForm } from 'react-hook-form';
 import AddDialog from '../components/horasextras/addDialog';
 import useStyles from '../styles';
 import FormTextField from '../components/formFields/formTextField';
 import FormDatePicker from '../components/formFields/formDatePicker';
-import { differenceInMinutes } from 'date-fns';
+import moment from 'moment';
+import { JUST_LETTERS_AND_SPACES_REGEXP, SPANISH_REGEXP } from '../utils/regexp';
+import axios from 'axios';
 
 
 export default function ExtraHours() {
@@ -40,16 +43,17 @@ export default function ExtraHours() {
     const sm = useMediaQuery(theme.breakpoints.down('sm'));
 
     //#region Tooltip
-    const [open, setOpen] = useState(false);
+    const [openTitleTooltip, setOpenTitleTooltip] = useState(false);
+    const [openMax20Rows, setOpenMax20Rows] = useState(false);
 
     const handleTooltipClick = () => {
-        setOpen(!open);
+        setOpenTitleTooltip(!openTitleTooltip);
     };
     const handleTooltipMouseEnter = () => {
-        setOpen(true);
+        setOpenTitleTooltip(true);
     };
     const handleTooltipMouseLeave = () => {
-        setOpen(false);
+        setOpenTitleTooltip(false);
     };
     //#endregion Tooltip
 
@@ -58,12 +62,17 @@ export default function ExtraHours() {
     const [edit, setEdit] = useState(false);
     const [overtimeWork, setOvertimeWork] = useState([]);
 
+    useEffect(() => {
+        setOpenMax20Rows(overtimeWork.length >= 20)
+    }, [overtimeWork])
+
     const handleAddDialogOpen = () => {
         setOpenAddDialog(true);
     };
 
     const handleAddDialogClose = () => {
         setOpenAddDialog(false)
+        
     };
 
     const handleAddDialogSubmit = (data) => {
@@ -84,6 +93,8 @@ export default function ExtraHours() {
     //#region form
     const { handleSubmit, control, errors } = useForm();
 
+    const [loading, setLoading] = useState(false);
+
 
     const addOvertimeWork = (data) => {
         setOvertimeWork([ ...overtimeWork, data ])
@@ -93,6 +104,10 @@ export default function ExtraHours() {
         setEdit({ data: data, index: idx })
         setOpenAddDialog(data)
     }
+
+    const duplicateOvertimeWork = (data, idx) => {
+        setOvertimeWork([ ...overtimeWork, data ])
+    }
     
 
     const removeOvertimeWork = (idx) => {
@@ -101,11 +116,47 @@ export default function ExtraHours() {
         setOvertimeWork(temp)
     }
 
-    const onSubmit = (data) => {
-        console.log({ 
-            ... { overtimework: overtimeWork },
-            ...data 
-        })
+    const onSubmit = async (data) => {
+        const payload = { 
+                fullname: String(data.fullname).trim(),
+                role: String(data.role).trim(),
+                dept: String(data.dept).trim(),
+                company: String(data.company).trim(),
+                month: new Date(data.month).toISOString(),
+                overtimework: overtimeWork.map(obj => ({
+                    overtimeDate: new Date(obj.overtimeDate).toISOString(),
+                    workdayStart: new Date(obj.workdayStart).toISOString(),
+                    workdayEnd: new Date(obj.workdayEnd).toISOString(),
+                    overtimeStartTime: new Date(obj.overtimeStartTime).toISOString(),
+                    overtimeEndTime: new Date(obj.overtimeEndTime).toISOString(),
+                    details: String(obj.details).trim()
+                })) 
+        }
+
+        try {
+            setLoading(true)
+            const response = await axios.post(`/excel/overtimework`, payload, {
+                responseType: 'blob'
+            })
+
+            const { fullname, month } = payload
+
+            const monthText = new Date(month).toLocaleDateString('es-ES', { month: 'long' })
+            const yearNumber = new Date(month).toLocaleDateString('es-ES', { year: 'numeric' })
+            const docName = `Formulario de Horas Extras - ${fullname} ${monthText} ${yearNumber}.xlsx`
+    
+            const href = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = href;
+            link.setAttribute('download', docName); //or any other extension
+            document.body.appendChild(link);
+            link.click();
+            setLoading(false)
+        } catch (e) {
+            console.error(e)
+            setLoading(false)
+        }
+
     };
 
     const onError = error => {
@@ -115,7 +166,7 @@ export default function ExtraHours() {
     //#endregion form
 
     const diffInHours = (start, end) => {
-        const minutes = differenceInMinutes(end, start) 
+        const minutes = moment.utc(end).diff(start, 'minutes')
         const hours = minutes/60
         return Math.round((hours + Number.EPSILON) * 100) / 100
     }
@@ -163,7 +214,13 @@ export default function ExtraHours() {
                                 <FormTextField
                                 name='fullname'
                                 label='Nombres y Apellidos'
-                                rules={{ required: true }}
+                                rules={{ 
+                                    required: 'Campo es requerido', 
+                                    pattern: {
+                                        value: JUST_LETTERS_AND_SPACES_REGEXP,
+                                        message: 'Solo se permiten letras y espacios'
+                                    }
+                                }}
                                 fullWidth
                                 />
                         </Box>
@@ -172,7 +229,14 @@ export default function ExtraHours() {
                                 <FormTextField
                                 name='role'
                                 label='Cargo'
-                                rules={{ required: true }}
+                                placeholder='Backend Developer'
+                                rules={{ 
+                                    required: 'Campo es requerido', 
+                                    pattern: {
+                                        value: SPANISH_REGEXP, 
+                                        message: 'No se permiten caracteres especiales'
+                                    }
+                                }}
                                 className={classes.textfieldGrow}
                                 fullWidth
                                 />
@@ -180,7 +244,14 @@ export default function ExtraHours() {
                                 <FormTextField
                                 name='dept'
                                 label='Departamento'
-                                rules={{ required: true }}
+                                placeholder='Awesome Outsourcing'
+                                rules={{ 
+                                    required: 'Campo es requerido', 
+                                    pattern: {
+                                        value: SPANISH_REGEXP, 
+                                        message: 'No se permiten caracteres especiales'
+                                    } 
+                                }}
                                 className={classes.textfieldGrow}
                                 fullWidth
                                 />
@@ -188,6 +259,19 @@ export default function ExtraHours() {
                         </Box>
                         <Box mt={2}>
                             <div className={classes.row}>
+                                <FormTextField
+                                name='company'
+                                label='Empresa'
+                                helperText='Opcional'
+                                rules={{ 
+                                    pattern: {
+                                        value: SPANISH_REGEXP, 
+                                        message: 'No se permiten caracteres especiales'
+                                    } 
+                                }}
+                                className={classes.textfieldGrow}
+                                fullWidth
+                                />
                                 <FormDatePicker
                                 name='month'
                                 label='Período'
@@ -208,7 +292,7 @@ export default function ExtraHours() {
                                     Jornada Extraordinaria
                                     <Tooltip 
                                     title='Días en los cuales se realizó la jornada extraordinaria'
-                                    open={open}>
+                                    open={openTitleTooltip}>
                                         <IconButton 
                                         onClick={handleTooltipClick} 
                                         onMouseEnter={handleTooltipMouseEnter} 
@@ -218,23 +302,28 @@ export default function ExtraHours() {
                                         </IconButton>
                                     </Tooltip>
                                 </Typography>
-                                {
-                                    sm ? (
-                                    <IconButton 
-                                    onClick={handleAddDialogOpen}
-                                    cl8assName={classes.tableAddButton}>
-                                        <AddIcon/>
-                                    </IconButton>
-                                    ) : (
-                                    <Button
-                                    size='large'
-                                    startIcon={<AddIcon/>}
-                                    onClick={handleAddDialogOpen}
-                                    className={classes.tableAddButton}>
-                                        Agregar
-                                    </Button>
-                                    )
-                                }
+                                <Tooltip 
+                                    title='Máximo 20 filas'
+                                    open={openMax20Rows}
+                                    placement='top'>
+                                    {
+                                        sm ? (
+                                        <IconButton 
+                                        onClick={handleAddDialogOpen}
+                                        cl8assName={classes.tableAddButton}>
+                                            <AddIcon/>
+                                        </IconButton>
+                                        ) : (
+                                        <Button
+                                        size='large'
+                                        startIcon={<AddIcon/>}
+                                        onClick={handleAddDialogOpen}
+                                        className={classes.tableAddButton}>
+                                            Agregar
+                                        </Button>
+                                        )
+                                    }
+                                </Tooltip>
                             </Toolbar>
                             <TableContainer>
                                 <Table className={classes.table} aria-label='Jornada Extraordinaria'>
@@ -259,6 +348,9 @@ export default function ExtraHours() {
                                                     <IconButton size='small' onClick={() => editOvertimeWork(row, i)}>
                                                         <EditIcon/>
                                                     </IconButton>
+                                                    <IconButton size='small' onClick={() => duplicateOvertimeWork(row, i)}>
+                                                        <DuplicateIcon/>
+                                                    </IconButton>
                                                     <IconButton size='small' onClick={() => removeOvertimeWork(i)}>
                                                         <DeleteIcon/>
                                                     </IconButton>
@@ -278,7 +370,7 @@ export default function ExtraHours() {
                         </Paper>
                         </Box>
                         <Box my={2} px={sm ? 0 : 3} width='100%'>
-                            <Button type='submit' variant='contained' size='large' color='secondary' fullWidth>
+                            <Button type='submit' variant='contained' size='large' color='secondary' disabled={loading} fullWidth>
                                 Generar Excel
                             </Button>
                         </Box>

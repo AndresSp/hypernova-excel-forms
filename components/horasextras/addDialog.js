@@ -12,6 +12,7 @@ import {
 import React, { useEffect } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import useStyles from '../../styles';
+import { SPANISH_REGEXP } from '../../utils/regexp';
 import FormDatePicker from '../formFields/formDatePicker';
 import FormTextField from '../formFields/formTextField';
 import FormTimePicker from '../formFields/formTimePicker';
@@ -23,7 +24,6 @@ const AddDialog = ({ open, onClose, onSubmit, onEdit, edit = false }) => {
     const { handleSubmit, control, errors, reset } = useForm();
 
     useEffect(() => {
-        console.log(edit)
         if (!!edit) {
             reset(edit.data)
         }
@@ -112,7 +112,7 @@ const AddDialog = ({ open, onClose, onSubmit, onEdit, edit = false }) => {
                         <FormTextField
                         name='details'
                         label='Justificativos'
-                        rules={{ required: true }}
+                        rules={{ required: true, pattern: SPANISH_REGEXP }}
                         className={classes.textfieldGrow}
                         fullWidth
                         multiline
