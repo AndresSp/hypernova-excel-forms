@@ -19,7 +19,8 @@ module.exports = {
              contentSecurityPolicy: {
               directives: {
                 defaultSrc: [
-                  "'self'"
+                  "'self'",
+                  "https://hypernova-excel-forms.herokuapp.com/"
                 ],
                 styleSrc: ["'self'", "'unsafe-inline'"],
                 imgSrc: ["'self'"],
