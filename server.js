@@ -1,7 +1,9 @@
 'use strict';
 
 const Hapi = require('@hapi/hapi');
-const next = require('next')
+const Inert = require('@hapi/inert');
+const next = require('next');
+const { overTimeWork } = require('./handlers/excel/overtimework');
 const { pathWrapper, nextHandlerWrapper } = require('./next-wrapper')
 require('dotenv').config();
 
@@ -10,18 +12,33 @@ const app = next({ dev })
 
 const server = Hapi.Server({
     host: 'localhost',
-    port: parseInt(process.env.PORT, 10) || 3000
+    port: parseInt(process.env.PORT, 10) || 3000,
+    routes: {
+      cors: {
+          origin: ['*']
+      }
+    },
+    debug: { request: ['error'] }
 });
 
 const main = async function () {
+
+    await server.register(Inert);
 
     await app.prepare()
     
       server.route({
         method: 'GET',
         path: '/_next/{p*}' /* next specific routes */,
-        handler: nextHandlerWrapper(app),
+        handler: nextHandlerWrapper(app)
       })
+
+      server.route({
+        method: 'POST',
+        path: '/excel/overtimework',
+        handler: overTimeWork
+      })
+
     
       server.route({
         method: '*',

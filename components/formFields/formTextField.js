@@ -10,6 +10,7 @@ const FormTextField = ({
     rules,
     error,
     helperText,
+    placeholder = '',
     ...rest }) => {
     const { errors, control } = useFormContext();
 
@@ -23,6 +24,7 @@ const FormTextField = ({
             label={label} 
             variant='outlined'
             size='medium'
+            placeholder={placeholder}
             error={hasError}
             helperText={errText}
             className={className}
