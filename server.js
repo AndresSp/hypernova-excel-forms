@@ -15,7 +15,8 @@ const server = Hapi.Server({
     port: parseInt(process.env.PORT, 10) || 3000,
     routes: {
       cors: true
-    }
+    },
+    debug: { request: ['error'] }
 });
 
 const main = async function () {
