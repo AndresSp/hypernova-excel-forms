@@ -14,11 +14,8 @@ const server = Hapi.Server({
     host: 'localhost',
     port: parseInt(process.env.PORT, 10) || 3000,
     routes: {
-      cors: {
-          origin: ['*']
-      }
-    },
-    debug: { request: ['error'] }
+      cors: true
+    }
 });
 
 const main = async function () {
