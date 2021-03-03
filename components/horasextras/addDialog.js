@@ -70,7 +70,7 @@ const AddDialog = ({ open, onClose, onSubmit, onEdit, edit = false }) => {
                         />
                     </Box>
                     <Box mt={2}>
-                        <Typography className={classes.label}>Jornada Regular</Typography>
+                        <Typography style={{marginBottom: 5}}>Jornada Regular</Typography>
                         <div className={classes.row}>
                             <FormTimePicker
                             name='workdayStart'
@@ -89,7 +89,7 @@ const AddDialog = ({ open, onClose, onSubmit, onEdit, edit = false }) => {
                         </div>
                     </Box>
                     <Box mt={2}>
-                        <Typography className={classes.label} >Jornada Extraordinaria</Typography>
+                        <Typography style={{marginBottom: 5}} >Jornada Extraordinaria</Typography>
                         <div className={classes.row}>
                             <FormTimePicker
                             name='overtimeStartTime'
