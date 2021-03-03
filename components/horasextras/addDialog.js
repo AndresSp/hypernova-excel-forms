@@ -111,7 +111,12 @@ const AddDialog = ({ open, onClose, onSubmit, onEdit, edit = false }) => {
                         <FormTextField
                         name='details'
                         label='Justificativos'
-                        rules={{ required: true, pattern: SPANISH_REGEXP }}
+                        rules={{ 
+                            required: 'Campo es requerido', 
+                            pattern: {
+                            value: SPANISH_REGEXP, 
+                            message: 'No se permiten caracteres especiales'
+                        } }}
                         className={classes.textfieldGrow}
                         fullWidth
                         multiline
